@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saaki — Je rush la liberté</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --blue-dark: #1a2f6e;
+    --blue-mid: #4a7cc4;
+    --blue-sky: #87CEEB;
+    --blue-pale: #b8e0f7;
+    --white: #ffffff;
+    --accent: #00d4ff;
+    --green: #39ff14;
+    --pixel: 4px;
+    --glow: 0 0 20px rgba(74, 124, 196, 0.6);
+    --glow-strong: 0 0 40px rgba(0, 212, 255, 0.8);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── CUSTOM CURSOR ── */
+  .cursor {
+    width: 16px; height: 16px;
+    background: var(--accent);
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    image-rendering: pixelated;
+    clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 60%, 60% 100%, 0 100%);
+    transition: transform 0.1s;
+    mix-blend-mode: screen;
+  }
+  .cursor-trail {
+    width: 8px; height: 8px;
+    background: var(--blue-sky);
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.5;
+    image-rendering: pixelated;
+    transition: top 0.15s ease, left 0.15s ease;
+  }
+
+  /* ── PIXEL GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,124,196,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,124,196,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SCANLINES ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(13,17,23,0.95) 0%, transparent 100%);
+    backdrop-filter: blur(4px);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  @keyframes spin360 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes coinSpin {
+    0%   { transform: perspective(300px) rotateY(0deg); }
+    100% { transform: perspective(300px) rotateY(360deg); }
+  }
+
+  .nav-logo img {
+    width: 58px;
+    height: 58px;
+    object-fit: cover;
+    border-radius: 50%;
+    image-rendering: pixelated;
+    border: 2px solid rgba(74,124,196,0.6);
+    box-shadow: 0 0 14px rgba(0,212,255,0.5);
+    animation: coinSpin 3s linear infinite;
+    transition: box-shadow 0.3s;
+  }
+
+  .nav-logo:hover img {
+    box-shadow: 0 0 24px rgba(0,212,255,1);
+    animation-duration: 0.8s;
+  }
+
+  .nav-logo-text {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--accent);
+    text-shadow: var(--glow-strong);
+    letter-spacing: 4px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--blue-sky);
+    text-decoration: none;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.2s, text-shadow 0.2s;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 2px;
+    background: var(--accent);
+    transition: width 0.3s;
+    image-rendering: pixelated;
+  }
+
+  .nav-links a:hover { color: var(--accent); text-shadow: var(--glow); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* ── PIXEL DECORATORS ── */
+  .pixel-corner {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    image-rendering: pixelated;
+  }
+  .pixel-corner.tl { top: 0; left: 0; }
+  .pixel-corner.tr { top: 0; right: 0; }
+  .pixel-corner.bl { bottom: 0; left: 0; }
+  .pixel-corner.br { bottom: 0; right: 0; }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 40px;
+  }
+
+  .container {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    overflow: hidden;
+    padding-top: 120px;
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .hero-text {
+    position: relative;
+  }
+
+  .hero-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    animation: fadeInUp 0.6s ease both;
+  }
+
+  .hero-name {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--white);
+    text-shadow: 0 0 60px rgba(74,124,196,0.5);
+    margin-bottom: 8px;
+    animation: fadeInUp 0.6s 0.1s ease both;
+  }
+
+  .hero-name span {
+    color: var(--accent);
+    text-shadow: var(--glow-strong);
+  }
+
+  .hero-handle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: var(--blue-sky);
+    margin-bottom: 32px;
+    animation: fadeInUp 0.6s 0.2s ease both;
+  }
+
+  .hero-tagline {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--blue-sky);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    animation: fadeInUp 0.6s 0.3s ease both;
+  }
+
+  .hero-tagline::before {
+    content: '> ';
+    color: var(--accent);
+    animation: blink 1s infinite;
+  }
+
+  .hero-tagline::after {
+    content: '_';
+    color: var(--accent);
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 48px;
+    animation: fadeInUp 0.6s 0.4s ease both;
+  }
+
+  .stat-box {
+    position: relative;
+    padding: 16px 20px;
+    border: 1px solid rgba(74,124,196,0.4);
+    background: rgba(26,47,110,0.2);
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .stat-box .pixel-corner { background: var(--blue-mid); }
+
+  .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--blue-sky);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* ── DINO PIXEL ART ── */
+  .dino-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+    animation: fadeInUp 0.6s 0.2s ease both;
+  }
+
+  .dino-frame {
+    position: relative;
+    padding: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    border: none;
+    background: none;
+  }
+
+  .dino-frame .pixel-corner { background: var(--accent); width: 10px; height: 10px; }
+
+  canvas#dino {
+    image-rendering: pixelated;
+    display: block;
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  .section-index {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .section-title .accent { color: var(--accent); }
+
+  .section-line {
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    margin-top: 16px;
+    image-rendering: pixelated;
+  }
+
+  /* ── ABOUT ── */
+  #about { background: linear-gradient(180deg, transparent, rgba(26,47,110,0.1), transparent); }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .about-card {
+    position: relative;
+    padding: 32px;
+    border: 1px solid rgba(74,124,196,0.3);
+    background: rgba(26,47,110,0.15);
+    backdrop-filter: blur(4px);
+  }
+
+  .about-age {
+    font-family: 'Orbitron', monospace;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--blue-dark);
+    -webkit-text-stroke: 2px rgba(74,124,196,0.4);
+    line-height: 1;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .about-age-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--blue-sky);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .about-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--blue-mid), transparent);
+    margin: 24px 0;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    flex-shrink: 0;
+    animation: pulse-green 2s infinite;
+  }
+
+  @keyframes pulse-green {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+    50% { opacity: 0.6; box-shadow: 0 0 4px var(--green); }
+  }
+
+  .status-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--blue-sky);
+    letter-spacing: 1px;
+  }
+
+  .about-bio {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.9;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .about-bio strong {
+    color: var(--blue-sky);
+    font-weight: 700;
+  }
+
+  .about-bio .highlight {
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* ── BUILD SECTION ── */
+  #build { }
+
+  .build-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .build-card {
+    position: relative;
+    padding: 28px 28px 28px 20px;
+    border: 1px solid rgba(74,124,196,0.25);
+    background: rgba(13,17,23,0.8);
+    transition: border-color 0.3s, background 0.3s, transform 0.3s;
+    overflow: hidden;
+  }
+
+  .build-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--blue-mid);
+    transition: background 0.3s;
+    image-rendering: pixelated;
+  }
+
+  .build-card:hover {
+    border-color: rgba(74,124,196,0.6);
+    background: rgba(26,47,110,0.2);
+    transform: translateX(4px);
+  }
+
+  .build-card:hover::before {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .build-card-icon {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .build-card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .build-card-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .build-bar {
+    margin-top: 16px;
+    height: 4px;
+    background: rgba(74,124,196,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .build-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue-mid), var(--accent));
+    box-shadow: 0 0 8px var(--accent);
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    image-rendering: pixelated;
+  }
+
+  /* ── OBJECTIVES ── */
+  #objectives { background: linear-gradient(180deg, transparent, rgba(26,47,110,0.08), transparent); }
+
+  .objectives-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .objective-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 24px;
+    border: 1px solid rgba(74,124,196,0.2);
+    background: rgba(13,17,23,0.6);
+    position: relative;
+    transition: all 0.3s;
+    overflow: hidden;
+  }
+
+  .objective-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,212,255,0.03), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .objective-item:hover {
+    border-color: rgba(74,124,196,0.5);
+    transform: translateX(8px);
+  }
+
+  .objective-item:hover::after { opacity: 1; }
+
+  .obj-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: rgba(26,47,110,0.8);
+    -webkit-text-stroke: 1px rgba(74,124,196,0.3);
+    line-height: 1;
+  }
+
+  .obj-content {}
+
+  .obj-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .obj-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--blue-sky);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .obj-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    padding: 4px 10px;
+    border: 1px solid;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .obj-status.active {
+    color: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 8px rgba(57,255,20,0.2);
+  }
+
+  .obj-status.locked {
+    color: var(--blue-mid);
+    border-color: rgba(74,124,196,0.4);
+  }
+
+  /* ── LINKS ── */
+  #links { min-height: auto; padding: 80px 40px 120px; }
+
+  .links-inner {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 40px;
+    background: transparent;
+    border: 2px solid var(--blue-mid);
+    color: var(--white);
+    text-decoration: none;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    margin: 8px;
+  }
+
+  .link-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--blue-mid);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+
+  .link-btn:hover {
+    color: var(--bg);
+    border-color: var(--accent);
+    box-shadow: var(--glow-strong);
+  }
+
+  .link-btn:hover::before {
+    background: var(--accent);
+    transform: translateX(0);
+  }
+
+  .link-btn .icon {
+    font-size: 1.1rem;
+    color: var(--accent);
+    transition: color 0.3s;
+  }
+
+  .link-btn:hover .icon { color: var(--bg); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 32px;
+    border-top: 1px solid rgba(74,124,196,0.15);
+  }
+
+  footer span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(74,124,196,0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  footer span .accent { color: var(--accent); }
+
+
+  .robot-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 230px;
+  }
+
+  .robot-frame {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  .btc-container {
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .btc-container canvas {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .btc-label {
+    font-family: "Orbitron", monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--blue-sky);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .btc-label span {
+    display: block;
+    font-size: 0.6rem;
+    color: rgba(135,206,235,0.5);
+    margin-top: 4px;
+    font-family: "Share Tech Mono", monospace;
+  }
+
+  .eth-container {
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
+  }
+
+  .eth-label {
+    font-family: "Orbitron", monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--blue-sky);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: right;
+  }
+
+  .eth-label span {
+    display: block;
+    font-size: 0.6rem;
+    color: rgba(135,206,235,0.5);
+    margin-top: 4px;
+    font-family: "Share Tech Mono", monospace;
+  }
+
+  .eth-container canvas {
+    display: block;
+    flex-shrink: 0;
+    animation: coinSpin 3s linear infinite;
+  }
+
+  @keyframes btcGlitch {
+    0%   { transform: translate(0,0) skew(0deg); filter: none; opacity: 1; }
+    2%   { transform: translate(-3px, 1px) skew(1deg); filter: hue-rotate(90deg) brightness(1.5); opacity: 0.9; }
+    4%   { transform: translate(3px, -1px) skew(-1deg); filter: hue-rotate(-90deg) brightness(1.2); }
+    5%   { transform: translate(0,0) skew(0deg); filter: none; opacity: 1; }
+    48%  { transform: translate(0,0); filter: none; opacity: 1; }
+    50%  { transform: translate(2px, 0) skew(0.5deg); filter: brightness(1.8) saturate(2); opacity: 0.85; }
+    52%  { transform: translate(0,0); filter: none; opacity: 1; }
+    95%  { transform: translate(0,0); filter: none; opacity: 1; }
+    96%  { transform: translate(-4px, 0) skew(-2deg); filter: hue-rotate(45deg) brightness(2); }
+    98%  { transform: translate(0,0); filter: none; opacity: 1; }
+    100% { transform: translate(0,0); filter: none; opacity: 1; }
+  }
+
+  @keyframes btcFloat {
+    0%, 100% { transform: translateY(0px); filter: drop-shadow(0 0 8px rgba(247,147,26,0.4)); }
+    50%       { transform: translateY(-10px); filter: drop-shadow(0 0 20px rgba(247,147,26,0.8)); }
+  }
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--blue-dark); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--blue-mid); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes glitch {
+    0%, 100% { clip-path: inset(0 0 100% 0); }
+    10% { clip-path: inset(20% 0 60% 0); transform: translateX(-4px); }
+    20% { clip-path: inset(50% 0 30% 0); transform: translateX(4px); }
+    30% { clip-path: inset(0 0 100% 0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── PIXEL ART DECORATIONS ── */
+  .pixel-scatter {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: var(--accent);
+    image-rendering: pixelated;
+    opacity: 0.4;
+    animation: pixel-float linear infinite;
+  }
+
+  @keyframes pixel-float {
+    0% { transform: translateY(0) translateX(0); opacity: 0.4; }
+    100% { transform: translateY(-60px) translateX(20px); opacity: 0; }
+  }
+
+  /* ── TICKER ── */
+  .ticker-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(13,17,23,0.95);
+    border-top: 1px solid rgba(74,124,196,0.3);
+    padding: 8px 0;
+    overflow: hidden;
+  }
+
+  .ticker-inner {
+    display: flex;
+    animation: ticker 40s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--blue-sky);
+    letter-spacing: 2px;
+    padding: 0 32px;
+    flex-shrink: 0;
+  }
+
+  .ticker-item .up { color: var(--green); }
+  .ticker-item .down { color: #ff4757; }
+  .ticker-item .sep { color: rgba(74,124,196,0.4); margin: 0 8px; }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── LOADING SCREEN ── */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+
+  #loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .loader-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    text-shadow: var(--glow-strong);
+  }
+
+  .loader-bar-wrap {
+    width: 200px;
+    height: 6px;
+    background: rgba(74,124,196,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loader-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue-mid), var(--accent));
+    width: 0%;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .loader-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(74,124,196,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .dino-container { display: flex; justify-content: center; margin-top: 200px; }
+    .dino-frame { display: flex; flex-direction: row; gap: 16px; align-items: flex-end; }
+    canvas#dino { width: 110px !important; height: 121px !important; }
+    .dino-frame img { width: 110px !important; height: 110px !important; margin: 0 !important; }
+    .about-grid { grid-template-columns: 1fr; }
+    .build-grid { grid-template-columns: 1fr; }
+    .objective-item { grid-template-columns: 50px 1fr; }
+    .obj-status { display: none; }
+    nav { padding: 16px 20px; }
+    .nav-links { gap: 16px; }
+    section { padding: 100px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-text">SAAKI.EXE</div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar-fill" id="loader-bar"></div>
+  </div>
+  <div class="loader-sub" id="loader-msg">INITIALIZING...</div>
+</div>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursor-trail"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo"><img src="logo.jpg" alt="Saaki"></a>
+  <ul class="nav-links">
+    <li><a href="#about">À PROPOS</a></li>
+    <li><a href="#build">BUILD</a></li>
+    <li><a href="#objectives">OBJECTIFS</a></li>
+    <li><a href="#links">LIENS</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-tag">// PLAYER ONE HAS ENTERED</div>
+        <h1 class="hero-name">S<span>aa</span>ki</h1>
+        <div class="hero-handle">@TheRealSaaki</div>
+        <div class="hero-tagline">Je rush la liberté</div>
+        <div class="hero-stats">
+          <div class="stat-box">
+            <div class="pixel-corner tl"></div>
+            <div class="pixel-corner br"></div>
+            <span class="stat-num">21</span>
+            <span class="stat-label">ANS</span>
+          </div>
+          <div class="stat-box">
+            <div class="pixel-corner tl"></div>
+            <div class="pixel-corner br"></div>
+            <span class="stat-num">∞</span>
+            <span class="stat-label">AMBITION</span>
+          </div>
+          <div class="stat-box">
+            <div class="pixel-corner tl"></div>
+            <div class="pixel-corner br"></div>
+            <span class="stat-num">0→1</span>
+            <span class="stat-label">EN COURS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dino-container">
+        <div class="dino-frame">
+          <canvas id="dino" width="200" height="220"></canvas>
+          <img src="bitcoin-pixel-computer.png" alt="Bitcoin" style="animation:btcFloat 3s ease-in-out infinite;width:160px;height:160px;object-fit:contain;image-rendering:pixelated;align-self:flex-start;margin-top:-10px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ ABOUT ═══════════ -->
+<section id="about">
+  <div class="container reveal">
+    <div class="about-grid">
+      <div>
+        <div class="section-header">
+          <div class="section-index">// 001</div>
+          <h2 class="section-title">À <span class="accent">PROPOS</span></h2>
+          <div class="section-line"></div>
+        </div>
+        <div class="about-card">
+          <div class="pixel-corner tl"></div>
+          <div class="pixel-corner br"></div>
+          <span class="about-age">21</span>
+          <span class="about-age-label">ANS · PARIS · FRANCE</span>
+          <div class="about-divider"></div>
+          <div class="status-row">
+            <div class="status-dot"></div>
+            <span class="status-text">ONLINE — MODE: CONSTRUCTION</span>
+          </div>
+          <div class="status-row">
+            <div class="status-dot" style="background:#4a7cc4;box-shadow:0 0 8px #4a7cc4;animation:none;"></div>
+            <span class="status-text">FOCUS: MACRO + MARCHÉS</span>
+          </div>
+          <div class="status-row">
+            <div class="status-dot" style="background:#4a7cc4;box-shadow:0 0 8px #4a7cc4;animation:none;"></div>
+            <span class="status-text">MISSION: LIBERTÉ TOTALE</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding-top: 80px;">
+        <p class="about-bio">
+          J'apprends la <strong>macro-économie en public</strong>. Chaque jour je construis mes compétences sur les marchés financiers — analyse macro, <span class="highlight">carry trade</span>, <span class="highlight">yield curve</span>, <span class="highlight">liquidité globale</span>.<br><br>
+          Je ne viens pas d'une école de finance. Je construis tout from scratch, avec discipline et rigueur — indicateurs par indicateurs, cycle par cycle, jusqu'à maîtriser le framework complet.<br><br>
+          Je suis dans une <strong>phase de construction intensive</strong>. Chaque semaine compte. Chaque data point publiée, chaque signal de la Fed, chaque mouvement de la courbe des taux — j'apprends à les lire en temps réel.
+        </p>
+        <div class="robot-container">
+          <div class="robot-frame">
+            <canvas id="robot" width="120" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BUILD ═══════════ -->
+<section id="build">
+  <div class="container reveal">
+    <div class="section-header">
+      <div class="section-index">// 002</div>
+      <h2 class="section-title">CE QUE JE <span class="accent">CONSTRUIS</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="build-grid">
+      <div class="build-card">
+        <div class="build-card-icon">// SKILL_001</div>
+        <div class="build-card-title">MACRO & MARCHÉS</div>
+        <div class="build-card-desc">Yield curve, liquidité globale, cycles de crédit Dalio, leading indicators. Je construis un framework de lecture expert niveau institutionnel.</div>
+        <div class="build-bar"><div class="build-bar-fill" data-width="72%" style="width:0%"></div></div>
+      </div>
+      <div class="build-card">
+        <div class="build-card-icon">// SKILL_002</div>
+        <div class="build-card-title">TWITTER @TheRealSaaki</div>
+        <div class="build-card-desc">Analyses macro quotidiennes. J'apprends en public — chaque thesis, chaque trade, chaque erreur. La transparence comme moteur de progression.</div>
+        <div class="build-bar"><div class="build-bar-fill" data-width="58%" style="width:0%"></div></div>
+      </div>
+      <div class="build-card">
+        <div class="build-card-icon">// SKILL_003</div>
+        <div class="build-card-title">SWING TRADING</div>
+        <div class="build-card-desc">Formation avec mentor. Apprentissage du timing, de la gestion du risque, et de l'exécution sur les marchés financiers. Discipline avant tout.</div>
+        <div class="build-bar"><div class="build-bar-fill" data-width="45%" style="width:0%"></div></div>
+      </div>
+      <div class="build-card">
+        <div class="build-card-icon">// SKILL_004</div>
+        <div class="build-card-title">CAPITAL CRYPTO</div>
+        <div class="build-card-desc">Construction d'un portefeuille crypto avec approche macro-driven. BTC comme beta élevé de la liquidité globale. Patience de cycle long.</div>
+        <div class="build-bar"><div class="build-bar-fill" data-width="38%" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="btc-container reveal">
+      <img src="bitcoin.png" alt="Bitcoin" style="width:90px;height:90px;object-fit:contain;animation:btcGlitch 4s infinite;image-rendering:pixelated;">
+      <div class="btc-label">
+        BITCOIN
+        <span>// STORE OF VALUE · BETA LIQUIDITÉ ×5</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ OBJECTIVES ═══════════ -->
+<section id="objectives">
+  <div class="container reveal">
+    <div class="section-header">
+      <div class="section-index">// 003</div>
+      <h2 class="section-title">MES <span class="accent">OBJECTIFS</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="objectives-list">
+      <div class="objective-item">
+        <div class="obj-num">01</div>
+        <div class="obj-content">
+          <div class="obj-title">LIBERTÉ FINANCIÈRE</div>
+          <div class="obj-sub">Capital travaille pour moi, pas l'inverse</div>
+        </div>
+        <div class="obj-status active">EN COURS</div>
+      </div>
+      <div class="objective-item">
+        <div class="obj-num">02</div>
+        <div class="obj-content">
+          <div class="obj-title">LIBERTÉ GÉOGRAPHIQUE</div>
+          <div class="obj-sub">Vivre où je veux, quand je veux</div>
+        </div>
+        <div class="obj-status locked">LOCKED</div>
+      </div>
+      <div class="objective-item">
+        <div class="obj-num">03</div>
+        <div class="obj-content">
+          <div class="obj-title">MAÎTRISER LES MARCHÉS</div>
+          <div class="obj-sub">Lire la macro seul, décisions 100% miennes</div>
+        </div>
+        <div class="obj-status active">EN COURS</div>
+      </div>
+      <div class="objective-item">
+        <div class="obj-num">04</div>
+        <div class="obj-content">
+          <div class="obj-title">VIVRE SELON MES RÈGLES</div>
+          <div class="obj-sub">Aucun compromis, aucune permission demandée</div>
+        </div>
+        <div class="obj-status active">LOADING...</div>
+      </div>
+    </div>
+  <!-- ETH logo -->
+    <div class="eth-container reveal">
+      <div class="eth-label">
+        ETHEREUM
+        <span>// LAYER 1 · SMART CONTRACTS · DeFi</span>
+      </div>
+      <canvas id="ethLogo" width="90" height="90"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ LINKS ═══════════ -->
+<section id="links">
+  <div class="container reveal">
+    <div class="links-inner">
+      <div class="section-header" style="text-align:center;">
+        <div class="section-index">// 004</div>
+        <h2 class="section-title">ME <span class="accent">TROUVER</span></h2>
+        <div class="section-line" style="margin: 16px auto 0;"></div>
+      </div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:rgba(135,206,235,0.6);letter-spacing:2px;margin-bottom:40px;">ANALYSES QUOTIDIENNES · MACRO EN PUBLIC · THOUGHTS RAW</p>
+      <a href="https://twitter.com/TheRealSaaki" target="_blank" rel="noopener" class="link-btn">
+        <span class="icon">𝕏</span>
+        @TheRealSaaki
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 <span class="accent">SAAKI</span> — BUILT IN THE GRIND · ALL RIGHTS RESERVED</span>
+</footer>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-inner">
+    <span class="ticker-item">BTC/USD <span class="up">▲ +2.4%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">SPX <span class="up">▲ +0.8%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">US10Y <span class="down">▼ 4.14%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">DXY <span class="down">▼ -0.3%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">GOLD <span class="up">▲ +1.1%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">VIX <span class="down">▼ 18.2</span> <span class="sep">|</span></span>
+    <span class="ticker-item">ETH/USD <span class="up">▲ +3.2%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">HY SPREADS <span class="down">▼ 342bps</span> <span class="sep">|</span></span>
+    <span class="ticker-item">2s10s <span class="up">▲ +12bps</span> <span class="sep">|</span></span>
+    <span class="ticker-item">COPPER <span class="up">▲ +0.6%</span> <span class="sep">|</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">BTC/USD <span class="up">▲ +2.4%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">SPX <span class="up">▲ +0.8%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">US10Y <span class="down">▼ 4.14%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">DXY <span class="down">▼ -0.3%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">GOLD <span class="up">▲ +1.1%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">VIX <span class="down">▼ 18.2</span> <span class="sep">|</span></span>
+    <span class="ticker-item">ETH/USD <span class="up">▲ +3.2%</span> <span class="sep">|</span></span>
+    <span class="ticker-item">HY SPREADS <span class="down">▼ 342bps</span> <span class="sep">|</span></span>
+    <span class="ticker-item">2s10s <span class="up">▲ +12bps</span> <span class="sep">|</span></span>
+    <span class="ticker-item">COPPER <span class="up">▲ +0.6%</span> <span class="sep">|</span></span>
+  </div>
+</div>
+
+<script>
+/* ── LOADER ── */
+const loaderMsgs = ['INITIALIZING...', 'LOADING ASSETS...', 'CONNECTING MARKETS...', 'READING YIELD CURVE...', 'SYSTEM READY'];
+let loadPct = 0;
+const loaderBar = document.getElementById('loader-bar');
+const loaderMsg = document.getElementById('loader-msg');
+const loader = document.getElementById('loader');
+
+const loadInterval = setInterval(() => {
+  loadPct += Math.random() * 18 + 5;
+  if (loadPct > 100) loadPct = 100;
+  loaderBar.style.width = loadPct + '%';
+  const msgIdx = Math.min(Math.floor(loadPct / 22), loaderMsgs.length - 1);
+  loaderMsg.textContent = loaderMsgs[msgIdx];
+  if (loadPct >= 100) {
+    clearInterval(loadInterval);
+    setTimeout(() => { loader.classList.add('hidden'); }, 400);
+  }
+}, 60);
+
+/* ── CURSOR ── */
+const cursor = document.getElementById('cursor');
+const trail = document.getElementById('cursor-trail');
+let mx = 0, my = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = (mx - 8) + 'px';
+  cursor.style.top = (my - 8) + 'px';
+  setTimeout(() => {
+    trail.style.left = (mx - 4) + 'px';
+    trail.style.top = (my - 4) + 'px';
+  }, 80);
+});
+
+/* ── PIXEL DINO ── */
+const canvas = document.getElementById('dino');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// Color palette
+const C = {
+  bg: 'transparent',
+  body: '#1a3a8f',      // dark blue body
+  bodyMid: '#2855b8',   // mid blue
+  shadow: '#0f1e5a',    // darkest shadow
+  eye: '#87CEEB',       // sky blue eye
+  eyeW: '#ffffff',      // white eye highlight
+  belly: '#4a7cc4',     // lighter belly
+  claw: '#5a9ad4',      // claw highlight
+  skyBg: '#1a2f6e',     // background accent
+};
+
+function px(x, y, color, size = 1) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x * 8, y * 8, 8 * size, 8 * size);
+}
+
+// Walk loop - slow
+const TOTAL = 60;
+
+function drawDino(f) {
+  ctx.clearRect(0, 0, 200, 220);
+
+  // slow walk cycle: 4 poses, change every 15 frames
+  const walkCycle = Math.floor(f / 15) % 4;
+  // gentle body bob
+  const bob = (walkCycle === 1 || walkCycle === 3) ? 1 : 0;
+
+  // subtle glow
+  const dg = ctx.createRadialGradient(100, 130, 5, 100, 130, 55);
+  dg.addColorStop(0, 'rgba(74,124,196,0.1)');
+  dg.addColorStop(1, 'transparent');
+  ctx.fillStyle = dg;
+  ctx.fillRect(0, 0, 200, 220);
+
+  ctx.save();
+  ctx.translate(0, bob);
+
+  // Tail
+  px(1,13,C.body); px(2,12,C.body); px(2,13,C.bodyMid);
+  px(3,11,C.body); px(3,12,C.bodyMid);
+
+  // Body
+  [[4,8],[5,8],[6,8],[7,8],[8,8],[9,8],
+   [3,9],[4,9],[5,9],[6,9],[7,9],[8,9],[9,9],[10,9],
+   [3,10],[4,10],[5,10],[6,10],[7,10],[8,10],[9,10],[10,10],
+   [3,11],[4,11],[5,11],[6,11],[7,11],[8,11],[9,11],[10,11],
+   [4,12],[5,12],[6,12],[7,12],[8,12],[9,12],[10,12],
+   [5,13],[6,13],[7,13],[8,13],[9,13]
+  ].forEach(([x,y]) => px(x,y,C.bodyMid));
+  [[4,8],[3,9],[3,10],[3,11]].forEach(([x,y]) => px(x,y,C.shadow));
+  [[9,8],[9,9],[9,10],[10,10]].forEach(([x,y]) => px(x,y,C.body));
+  [[5,11],[6,11],[7,11],[5,12],[6,12],[7,12],[5,13],[6,13]].forEach(([x,y]) => px(x,y,C.belly));
+
+  // Neck
+  [[7,6],[8,6],[9,6],[7,7],[8,7],[9,7]].forEach(([x,y]) => px(x,y,C.bodyMid));
+  [[6,7],[6,8]].forEach(([x,y]) => px(x,y,C.shadow));
+
+  // Head
+  [[8,2],[9,2],[10,2],[11,2],[12,2],
+   [7,3],[8,3],[9,3],[10,3],[11,3],[12,3],[13,3],
+   [7,4],[8,4],[9,4],[10,4],[11,4],[12,4],[13,4],
+   [7,5],[8,5],[9,5],[10,5],[11,5],[12,5],
+   [8,6],[9,6],[10,6],[11,6]
+  ].forEach(([x,y]) => px(x,y,C.bodyMid));
+  [[8,2],[7,3],[7,4],[7,5]].forEach(([x,y]) => px(x,y,C.shadow));
+  [[12,2],[13,3],[13,4],[12,5]].forEach(([x,y]) => px(x,y,C.body));
+  px(11,3,C.eyeW); px(12,3,C.eyeW); px(11,4,C.eye); px(12,4,C.shadow);
+  px(13,4,C.shadow);
+  px(7,1,C.body); px(8,0,C.bodyMid); px(9,1,C.body); px(6,2,C.shadow); px(7,2,C.body);
+
+  // Arm gentle sway
+  const armOff = (walkCycle === 0 || walkCycle === 1) ? 0 : 1;
+  px(9,10+armOff,C.bodyMid); px(10,10+armOff,C.body);
+  px(10,11+armOff,C.claw); px(11,11+armOff,C.claw);
+
+  // Legs slow walk
+  if (walkCycle === 0) {
+    // neutral
+    px(5,14,C.shadow); px(6,14,C.bodyMid); px(5,15,C.body); px(6,15,C.bodyMid);
+    px(5,16,C.claw); px(6,16,C.claw);
+    px(7,14,C.bodyMid); px(8,14,C.shadow); px(7,15,C.bodyMid); px(8,15,C.body);
+    px(8,16,C.claw); px(9,16,C.claw);
+  } else if (walkCycle === 1) {
+    // left foot forward
+    px(4,14,C.shadow); px(5,14,C.bodyMid); px(4,15,C.body); px(5,15,C.bodyMid);
+    px(3,16,C.claw); px(4,16,C.claw);
+    px(7,14,C.bodyMid); px(8,14,C.shadow); px(8,15,C.bodyMid); px(9,15,C.body);
+    px(9,16,C.claw); px(10,16,C.claw);
+  } else if (walkCycle === 2) {
+    // neutral again
+    px(5,14,C.shadow); px(6,14,C.bodyMid); px(5,15,C.body); px(6,15,C.bodyMid);
+    px(5,16,C.claw); px(6,16,C.claw);
+    px(7,14,C.bodyMid); px(8,14,C.shadow); px(7,15,C.bodyMid); px(8,15,C.body);
+    px(8,16,C.claw); px(9,16,C.claw);
+  } else {
+    // right foot forward
+    px(5,14,C.shadow); px(6,14,C.bodyMid); px(6,15,C.body); px(7,15,C.bodyMid);
+    px(6,16,C.claw); px(7,16,C.claw);
+    px(8,14,C.bodyMid); px(9,14,C.shadow); px(8,15,C.bodyMid); px(9,15,C.body);
+    px(8,16,C.shadow); px(9,16,C.claw);
+  }
+
+  ctx.restore();
+
+
+}
+
+let dinoFrame = 0;
+function animateDino() {
+  drawDino(dinoFrame++);
+  requestAnimationFrame(animateDino);
+}
+animateDino();
+
+/* ── SCROLL REVEAL ── */
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(el => {
+    if (el.isIntersecting) {
+      el.target.classList.add('visible');
+      // Animate build bars
+      el.target.querySelectorAll('.build-bar-fill[data-width]').forEach(bar => {
+        setTimeout(() => { bar.style.width = bar.dataset.width; }, 300);
+      });
+    }
+  });
+}, { threshold: 0.15 });
+
+reveals.forEach(r => observer.observe(r));
+
+/* ── PIXEL SCATTER ── */
+function spawnPixel() {
+  const px = document.createElement('div');
+  px.className = 'pixel-scatter';
+  px.style.left = Math.random() * 100 + 'vw';
+  px.style.bottom = '80px';
+  px.style.animationDuration = (Math.random() * 3 + 2) + 's';
+  px.style.animationDelay = (Math.random() * 2) + 's';
+  document.body.appendChild(px);
+  setTimeout(() => px.remove(), 6000);
+}
+setInterval(spawnPixel, 800);
+
+/* ── PIXEL ROBOT ── */
+const robotCanvas = document.getElementById('robot');
+if (robotCanvas) {
+  const rc = robotCanvas.getContext('2d');
+  rc.imageSmoothingEnabled = false;
+
+  const R = {
+    body:    '#1a3a8f',
+    mid:     '#2855b8',
+    light:   '#4a7cc4',
+    sky:     '#87CEEB',
+    dark:    '#0f1e5a',
+    screen:  '#00d4ff',
+    screenD: '#005577',
+  };
+
+  function rpx(x, y, c, w=1, h=1) {
+    rc.fillStyle = c;
+    rc.fillRect(x*8, y*8, 8*w, 8*h);
+  }
+
+  function drawRobot(frame) {
+    rc.clearRect(0, 0, 120, 140);
+
+    // glow bg
+    const g = rc.createRadialGradient(60, 70, 10, 60, 70, 60);
+    g.addColorStop(0, 'rgba(74,124,196,0.15)');
+    g.addColorStop(1, 'transparent');
+    rc.fillStyle = g;
+    rc.fillRect(0, 0, 120, 140);
+
+    // HEAD
+    [[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],
+     [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],
+     [1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],
+     [2,3],[3,3],[4,3],[5,3],[6,3],[7,3]
+    ].forEach(([x,y]) => rpx(x,y,R.mid));
+
+    // antenna
+    rpx(4,0,R.light); rpx(5,0,R.sky);
+    rpx(4,-1,R.sky);  // top pixel (clipped but fine)
+
+    // eye screen
+    rpx(2,1,R.dark); rpx(3,1,R.dark); rpx(4,1,R.dark); rpx(5,1,R.dark); rpx(6,1,R.dark); rpx(7,1,R.dark);
+    rpx(2,2,R.dark);
+    rpx(3,1,R.screen); rpx(4,1,R.screen); rpx(5,1,R.screenD); rpx(6,1,R.screen);
+    rpx(3,2,R.screenD); rpx(4,2,R.screen); rpx(5,2,R.screen); rpx(6,2,R.screenD);
+
+    // shadows head
+    rpx(1,1,R.dark); rpx(1,2,R.dark);
+    rpx(8,1,R.body); rpx(8,2,R.body);
+
+    // BODY
+    [[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],
+     [1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],
+     [1,6],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],
+     [2,7],[3,7],[4,7],[5,7],[6,7],[7,7]
+    ].forEach(([x,y]) => rpx(x,y,R.mid));
+
+    // chest square
+    rpx(3,4,R.light); rpx(4,4,R.light); rpx(5,4,R.light); rpx(6,4,R.light);
+    rpx(3,5,R.light); rpx(4,5,R.body);  rpx(5,5,R.body);  rpx(6,5,R.light);
+    rpx(3,6,R.light); rpx(4,6,R.light); rpx(5,6,R.light); rpx(6,6,R.light);
+
+    // body shadows
+    rpx(1,4,R.dark); rpx(1,5,R.dark); rpx(1,6,R.dark);
+    rpx(8,4,R.body); rpx(8,5,R.body); rpx(8,6,R.body);
+
+    // ARMS (animated)
+    const armOff = Math.sin(frame * 0.1) > 0 ? 0 : 1;
+    // left arm
+    rpx(0,4+armOff,R.body); rpx(0,5+armOff,R.mid); rpx(0,6+armOff,R.light);
+    // right arm
+    rpx(9,4+(1-armOff),R.body); rpx(9,5+(1-armOff),R.mid); rpx(9,6+(1-armOff),R.light);
+
+    // LEGS (animated)
+    const legOff = Math.sin(frame * 0.12) * 0.8 | 0;
+    // left leg
+    rpx(2,8,R.mid); rpx(3,8,R.body);
+    rpx(2,9+legOff,R.body); rpx(3,9+legOff,R.mid);
+    rpx(1,10+legOff,R.light); rpx(2,10+legOff,R.mid); rpx(3,10+legOff,R.light);
+    // right leg
+    rpx(5,8,R.body); rpx(6,8,R.mid);
+    rpx(5,9-legOff,R.mid); rpx(6,9-legOff,R.body);
+    rpx(5,10-legOff,R.light); rpx(6,10-legOff,R.mid); rpx(7,10-legOff,R.light);
+
+
+  }
+
+  let rf = 0;
+  function animRobot() { drawRobot(rf++); requestAnimationFrame(animRobot); }
+  animRobot();
+}
+
+/* ── BITCOIN PIXEL ART ── */
+const btcCanvas = document.getElementById('btcLogo');
+if (btcCanvas) {
+  const bc = btcCanvas.getContext('2d');
+  bc.imageSmoothingEnabled = false;
+
+  const B = {
+    orange:  '#f7931a',
+    light:   '#fab545',
+    dark:    '#c47414',
+    shadow:  '#7a4800',
+    white:   '#ffffff',
+    bg:      'transparent',
+  };
+
+  function bpx(x, y, c, w=1, h=1) {
+    bc.fillStyle = c;
+    bc.fillRect(x*9, y*9, 9*w, 9*h);
+  }
+
+  let btcFrame = 0;
+
+  function drawBTC(frame) {
+    bc.clearRect(0, 0, 90, 90);
+
+    // pulse glow fill
+    const pulse = Math.sin(frame * 0.06) * 0.5 + 0.5;
+    bc.fillStyle = `rgba(247,147,26,${pulse * 0.18})`;
+    bc.beginPath();
+    bc.arc(40.5, 40.5, 43, 0, Math.PI*2);
+    bc.fill();
+
+    // glow
+    const g = bc.createRadialGradient(45, 45, 5, 45, 45, 44);
+    g.addColorStop(0, 'rgba(247,147,26,0.2)');
+    g.addColorStop(1, 'transparent');
+    bc.fillStyle = g;
+    bc.fillRect(0, 0, 90, 90);
+
+    // coin circle - pixel art (9x9 grid)
+    const circle = [
+      [0,0,0,1,1,1,0,0,0],
+      [0,1,1,1,1,1,1,1,0],
+      [0,1,1,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1,1,1],
+      [0,1,1,1,1,1,1,1,0],
+      [0,1,1,1,1,1,1,1,0],
+      [0,0,0,1,1,1,0,0,0],
+    ];
+    circle.forEach((row, y) => row.forEach((cell, x) => {
+      if (!cell) return;
+      // edge = darker
+      const isEdge = (x===0||y===0||x===8||y===8||
+        (y===1&&(x===1||x===7))||(y===7&&(x===1||x===7)));
+      bpx(x, y, isEdge ? B.dark : (x<3?B.light:B.orange));
+    }));
+
+    // B letter pixel art (centered)
+    // vertical bar left
+    [[3,1],[3,2],[3,3],[3,4],[3,5],[3,6],[3,7]].forEach(([x,y])=>bpx(x,y,B.white));
+    // top bump
+    [[4,1],[5,1],[4,2],[5,2],[4,3],[5,3]].forEach(([x,y])=>bpx(x,y,B.white));
+    // mid bar
+    [[4,4],[5,4]].forEach(([x,y])=>bpx(x,y,B.white));
+    // bottom bump
+    [[4,5],[5,5],[4,6],[5,6],[4,7],[5,7]].forEach(([x,y])=>bpx(x,y,B.white));
+    // serifs top/bottom
+    [[4,3],[5,3]].forEach(([x,y])=>bpx(x,y,B.shadow));
+    [[4,7],[5,7]].forEach(([x,y])=>bpx(x,y,B.shadow));
+
+    // tilt serifs on B
+    bpx(2,1,B.white); bpx(2,7,B.white);
+
+
+  }
+
+  function animBTC() { drawBTC(btcFrame++); requestAnimationFrame(animBTC); }
+  animBTC();
+}
+
+/* ── ETHEREUM LOGO ── */
+const ethCanvas = document.getElementById('ethLogo');
+if (ethCanvas) {
+  const ec = ethCanvas.getContext('2d');
+  ec.imageSmoothingEnabled = true;
+  let ethFrame = 0;
+
+  function drawETH(frame) {
+    const w = ethCanvas.width, h = ethCanvas.height;
+    const cx = w / 2, cy = h / 2;
+    ec.clearRect(0, 0, w, h);
+
+    // pulse glow
+    const pulse = Math.sin(frame * 0.06) * 0.5 + 0.5;
+    const glow = ec.createRadialGradient(cx, cy, 2, cx, cy, w * 0.5);
+    glow.addColorStop(0, `rgba(98,126,234,${pulse * 0.35})`);
+    glow.addColorStop(1, 'transparent');
+    ec.fillStyle = glow;
+    ec.fillRect(0, 0, w, h);
+
+    const s = w * 0.38;
+
+    // Top diamond (upper half)
+    ec.beginPath();
+    ec.moveTo(cx, cy - s * 1.4);      // top point
+    ec.lineTo(cx - s, cy - s * 0.05); // left
+    ec.lineTo(cx, cy - s * 0.25);     // center
+    ec.closePath();
+    ec.fillStyle = '#8FA8F0';
+    ec.fill();
+
+    ec.beginPath();
+    ec.moveTo(cx, cy - s * 1.4);
+    ec.lineTo(cx + s, cy - s * 0.05);
+    ec.lineTo(cx, cy - s * 0.25);
+    ec.closePath();
+    ec.fillStyle = '#627EEA';
+    ec.fill();
+
+    // Bottom part left face
+    ec.beginPath();
+    ec.moveTo(cx - s, cy - s * 0.05);
+    ec.lineTo(cx, cy + s * 1.4);
+    ec.lineTo(cx, cy + s * 0.2);
+    ec.closePath();
+    ec.fillStyle = '#8FA8F0';
+    ec.fill();
+
+    // Bottom part right face
+    ec.beginPath();
+    ec.moveTo(cx + s, cy - s * 0.05);
+    ec.lineTo(cx, cy + s * 1.4);
+    ec.lineTo(cx, cy + s * 0.2);
+    ec.closePath();
+    ec.fillStyle = '#3D5BBA';
+    ec.fill();
+
+    // Center flat band left
+    ec.beginPath();
+    ec.moveTo(cx - s, cy - s * 0.05);
+    ec.lineTo(cx, cy - s * 0.25);
+    ec.lineTo(cx, cy + s * 0.2);
+    ec.closePath();
+    ec.fillStyle = '#7B9BE8';
+    ec.fill();
+
+    // Center flat band right
+    ec.beginPath();
+    ec.moveTo(cx + s, cy - s * 0.05);
+    ec.lineTo(cx, cy - s * 0.25);
+    ec.lineTo(cx, cy + s * 0.2);
+    ec.closePath();
+    ec.fillStyle = '#4A6FD4';
+    ec.fill();
+  }
+
+  function animETH() { drawETH(ethFrame++); requestAnimationFrame(animETH); }
+  animETH();
+}
+
+/* ── MOBILE DINO RESIZE ── */
+function resizeDinoCanvas() {
+  const c = document.getElementById('dino');
+  if (!c) return;
+  if (window.innerWidth <= 768) {
+    c.width = 140;
+    c.height = 154;
+  } else {
+    c.width = 200;
+    c.height = 220;
+  }
+}
+resizeDinoCanvas();
+window.addEventListener('resize', resizeDinoCanvas);
+</script>
+</body>
+</html>
